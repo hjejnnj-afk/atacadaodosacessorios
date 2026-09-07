@@ -982,66 +982,6 @@
     .testimonials__card:hover{transform:none;}
   }
 
-  /* ---- repair-scroll: mobile fallback ----
-     Locomotive Scroll usa transform:translate3d() no container,
-     o que quebra position:sticky em mobile. Neste breakpoint,
-     colapsamos a seção para 1 viewport e mostramos só o estado
-     final (logo + "escolha a melhor") de forma estática. O JS
-     detecta pointer:coarse e ativa a classe .is-mobile-static. */
-  @media (pointer: coarse) {
-    /* Seção colapsa para 1 viewport */
-    .repair-scroll.is-mobile-static {
-      height: 100svh !important;
-    }
-    /* Sticky vira flex coluna centralizada */
-    .repair-scroll.is-mobile-static .repair-sticky {
-      position: relative !important;
-      top: auto !important;
-      height: 100svh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1.5rem;
-      box-sizing: border-box;
-    }
-    /* Vídeo preto oculto */
-    .repair-scroll.is-mobile-static .repair-video-wrapper {
-      display: none !important;
-    }
-    /* Copy-final: sai de position:absolute para entrar no fluxo flex.
-       O problema anterior: left:50% + transform:none = conteúdo deslocado à direita.
-       Solução: position:static + width:100% → flex do pai centraliza. */
-    .repair-scroll.is-mobile-static .repair-copy-final {
-      position: static !important;
-      left: auto !important;
-      top: auto !important;
-      width: 100% !important;
-      max-width: 100% !important;
-      opacity: 1 !important;
-      transform: none !important;
-      text-align: center !important;
-      pointer-events: auto;
-    }
-    /* Logo centralizada, tamanho proporcional à tela */
-    .repair-scroll.is-mobile-static .repair-copy-final__logo {
-      opacity: 1 !important;
-      transform: none !important;
-      display: block;
-      height: auto !important;
-      max-height: 55svh;
-      width: auto !important;
-      max-width: 78vw;
-      margin: 1.5rem auto 0;
-    }
-    /* Esconder outros estados */
-    .repair-scroll.is-mobile-static .repair-copy-start,
-    .repair-scroll.is-mobile-static .repair-copy-process,
-    .repair-scroll.is-mobile-static .repair-copy-result {
-      display: none !important;
-    }
-  }
-
 </style>
 </head>
 <body>
@@ -1422,15 +1362,29 @@
 
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Locomotive Scroll v4 has a known incompatibility with touch handling on
+  // recent iOS Safari — in practice it can freeze scrolling on the page
+  // entirely (not just break position:sticky, which it also does to the
+  // repair-scroll section below). Touch devices skip it altogether and use
+  // the page's plain native scroll instead; every scroll reader on this
+  // page already falls back to window.scrollY / a native "scroll" listener
+  // whenever `scroller` is null, so nothing else needs to change for that
+  // path.
+  var isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
   // Smooth scroll + scroll-driven background color transition, in the brand's
   // own black/green palette. Skipped entirely under reduced-motion: Locomotive's
   // smooth scroll is itself a motion feature, so those visitors just get the
   // page's native scroll instead (the logo/header logic below falls back to it).
   var scrollContainer = document.querySelector('.container');
   var scroller = null;
-  if (scrollContainer && window.LocomotiveScroll && window.gsap && window.ScrollTrigger && !reduceMotion) {
-    gsap.registerPlugin(ScrollTrigger);
+  var useLocomotive = scrollContainer && window.LocomotiveScroll && window.gsap && window.ScrollTrigger && !reduceMotion && !isTouchDevice;
 
+  if (window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+  }
+
+  if (useLocomotive) {
     scroller = new LocomotiveScroll({ el: scrollContainer, smooth: true });
     scroller.on('scroll', ScrollTrigger.update);
 
@@ -1447,17 +1401,21 @@
     });
     ScrollTrigger.addEventListener('refresh', function(){ scroller.update(); });
     ScrollTrigger.refresh();
+  }
 
-    // Background color transition: each section's own brand-palette tone takes
-    // over the page background as it crosses the middle of the viewport, and
-    // hands back to the previous one when scrolling back up past it.
+  // Background color transition: each section's own brand-palette tone takes
+  // over the page background as it crosses the middle of the viewport, and
+  // hands back to the previous one when scrolling back up past it. Works the
+  // same whether ScrollTrigger is watching Locomotive's virtual scroll
+  // (desktop) or the page's native scroll (mobile/reduced-motion).
+  if (window.gsap && window.ScrollTrigger && !reduceMotion) {
     var colorEls = document.querySelectorAll('[data-bgcolor]');
     colorEls.forEach(function(section, i){
       var prevBg = i === 0 ? 'var(--bg)' : colorEls[i - 1].dataset.bgcolor;
       var prevText = i === 0 ? 'var(--white)' : colorEls[i - 1].dataset.textcolor;
       ScrollTrigger.create({
         trigger: section,
-        scroller: scrollContainer,
+        scroller: useLocomotive ? scrollContainer : undefined,
         start: 'top 50%',
         onEnter: function(){
           gsap.to('body', { backgroundColor: section.dataset.bgcolor, color: section.dataset.textcolor, duration: 0.6, overwrite: 'auto' });
@@ -1467,21 +1425,26 @@
         }
       });
     });
-
-    // In-page anchors (the logo -> #topo, "Ver serviços" -> #servicos) need to
-    // go through Locomotive's own scrollTo — native anchor jumps don't move
-    // its virtual scroll position.
-    document.querySelectorAll('a[href^="#"]:not([data-wa-msg])').forEach(function(link){
-      link.addEventListener('click', function(e){
-        var hash = link.getAttribute('href');
-        if (!hash || hash.length < 2) return;
-        var target = document.querySelector(hash);
-        if (!target) return;
-        e.preventDefault();
-        scroller.scrollTo(target);
-      });
-    });
   }
+
+  // In-page anchors (the logo -> #topo, "Ver serviços" -> #servicos) need to
+  // go through Locomotive's own scrollTo when it's driving the page — native
+  // anchor jumps don't move its virtual scroll position — or a plain smooth
+  // scrollIntoView otherwise.
+  document.querySelectorAll('a[href^="#"]:not([data-wa-msg])').forEach(function(link){
+    link.addEventListener('click', function(e){
+      var hash = link.getAttribute('href');
+      if (!hash || hash.length < 2) return;
+      var target = document.querySelector(hash);
+      if (!target) return;
+      e.preventDefault();
+      if (useLocomotive) {
+        scroller.scrollTo(target);
+      } else {
+        target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      }
+    });
+  });
 
   // Floating logo: starts big and centered at the very top of the page. As the
   // lead scrolls, the header bar behind it (background, border, button) fades
@@ -1890,19 +1853,6 @@
     const videoWrapper = document.querySelector(".repair-video-wrapper");
 
     if (!section || !video) return;
-
-    // MOBILE FIX — Locomotive Scroll quebra position:sticky dentro de
-    // elementos com transform, então a seção de vídeo scroll-scrubbed
-    // não funciona em touch devices. Em mobile, colapsamos para 1
-    // viewport e mostramos apenas o estado final com a logo.
-    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-    if (isTouchDevice) {
-      section.classList.add('is-mobile-static');
-      if (copyFinal)    copyFinal.classList.add('is-visible');
-      if (videoWrapper) videoWrapper.style.display = 'none';
-      return; // Sair — nenhum scroll listener nem render loop
-    }
-
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
