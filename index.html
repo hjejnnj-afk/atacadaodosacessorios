@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -981,6 +982,54 @@
     .testimonials__card{transition:none;}
     .testimonials__card:hover{transform:none;}
   }
+
+  /* ---- repair-scroll: mobile fallback ----
+     Locomotive Scroll usa transform:translate3d() no container,
+     o que quebra position:sticky em mobile. Neste breakpoint,
+     colapsamos a seção para 1 viewport e mostramos só o estado
+     final (logo + "escolha a melhor") de forma estática. O JS
+     detecta pointer:coarse e ativa a classe .is-mobile-static. */
+  @media (pointer: coarse) {
+    .repair-scroll.is-mobile-static {
+      height: 100svh !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .repair-scroll.is-mobile-static .repair-sticky {
+      position: relative !important;
+      top: auto !important;
+      height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Ocultar vídeo preto — ele não vai rolar no mobile */
+    .repair-scroll.is-mobile-static .repair-video-wrapper {
+      display: none !important;
+    }
+    /* Logo final grande e centrada */
+    .repair-scroll.is-mobile-static .repair-copy-final {
+      opacity: 1 !important;
+      transform: none !important;
+      pointer-events: auto;
+      text-align: center;
+    }
+    .repair-scroll.is-mobile-static .repair-copy-final__logo {
+      opacity: 1 !important;
+      transform: none !important;
+      height: 52svh;
+      max-width: 85vw;
+      margin: 1rem auto 0;
+    }
+    /* Esconder os outros estados de cópia no mobile */
+    .repair-scroll.is-mobile-static .repair-copy-start,
+    .repair-scroll.is-mobile-static .repair-copy-process,
+    .repair-scroll.is-mobile-static .repair-copy-result {
+      display: none !important;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -1829,6 +1878,19 @@
     const videoWrapper = document.querySelector(".repair-video-wrapper");
 
     if (!section || !video) return;
+
+    // MOBILE FIX — Locomotive Scroll quebra position:sticky dentro de
+    // elementos com transform, então a seção de vídeo scroll-scrubbed
+    // não funciona em touch devices. Em mobile, colapsamos para 1
+    // viewport e mostramos apenas o estado final com a logo.
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+    if (isTouchDevice) {
+      section.classList.add('is-mobile-static');
+      if (copyFinal)    copyFinal.classList.add('is-visible');
+      if (videoWrapper) videoWrapper.style.display = 'none';
+      return; // Sair — nenhum scroll listener nem render loop
+    }
+
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
