@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -990,39 +989,52 @@
      final (logo + "escolha a melhor") de forma estática. O JS
      detecta pointer:coarse e ativa a classe .is-mobile-static. */
   @media (pointer: coarse) {
+    /* Seção colapsa para 1 viewport */
     .repair-scroll.is-mobile-static {
       height: 100svh !important;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
+    /* Sticky vira flex coluna centralizada */
     .repair-scroll.is-mobile-static .repair-sticky {
       position: relative !important;
       top: auto !important;
       height: 100svh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 2rem 1.5rem;
+      box-sizing: border-box;
     }
-    /* Ocultar vídeo preto — ele não vai rolar no mobile */
+    /* Vídeo preto oculto */
     .repair-scroll.is-mobile-static .repair-video-wrapper {
       display: none !important;
     }
-    /* Logo final grande e centrada */
+    /* Copy-final: sai de position:absolute para entrar no fluxo flex.
+       O problema anterior: left:50% + transform:none = conteúdo deslocado à direita.
+       Solução: position:static + width:100% → flex do pai centraliza. */
     .repair-scroll.is-mobile-static .repair-copy-final {
+      position: static !important;
+      left: auto !important;
+      top: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
       opacity: 1 !important;
       transform: none !important;
+      text-align: center !important;
       pointer-events: auto;
-      text-align: center;
     }
+    /* Logo centralizada, tamanho proporcional à tela */
     .repair-scroll.is-mobile-static .repair-copy-final__logo {
       opacity: 1 !important;
       transform: none !important;
-      height: 52svh;
-      max-width: 85vw;
-      margin: 1rem auto 0;
+      display: block;
+      height: auto !important;
+      max-height: 55svh;
+      width: auto !important;
+      max-width: 78vw;
+      margin: 1.5rem auto 0;
     }
-    /* Esconder os outros estados de cópia no mobile */
+    /* Esconder outros estados */
     .repair-scroll.is-mobile-static .repair-copy-start,
     .repair-scroll.is-mobile-static .repair-copy-process,
     .repair-scroll.is-mobile-static .repair-copy-result {
