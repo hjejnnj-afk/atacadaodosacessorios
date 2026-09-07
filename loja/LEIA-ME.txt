@@ -1,0 +1,20 @@
+PASTA: loja/
+
+Adicione aqui as fotos reais da loja física:
+
+  1.jpg  → Foto da loja / fachada / vitrine
+  2.jpg  → Interior / bancada de atendimento
+  3.jpg  → Detalhe de serviço ou produto
+  4.jpg  → Equipe ou ambiente interno
+
+REQUISITOS:
+- Formato: JPG ou JPEG
+- Resolução mínima recomendada: 800×600px
+- Proporção: 4:3 (o CSS aplica object-fit: cover automaticamente)
+- Nomeados exatamente como: 1.jpg, 2.jpg, 3.jpg, 4.jpg
+
+REFERÊNCIA NO HTML:
+  src="loja/1.jpg"
+  src="loja/2.jpg"
+  src="loja/3.jpg"
+  src="loja/4.jpg"

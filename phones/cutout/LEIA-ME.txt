@@ -1,0 +1,21 @@
+PASTA: phones/cutout/
+
+Adicione aqui os seguintes arquivos de imagem (celulares recortados, sem fundo):
+
+  hero-iphone.png   → iPhone usado na seção hero (cutout grande)
+  1.png             → Apple iPhone (card de marca — seção "Não importa a marca")
+  2.png             → Samsung Galaxy
+  3.png             → Xiaomi
+  4.png             → Motorola
+
+REQUISITOS:
+- Fundo transparente (PNG com alpha)
+- Resolução mínima recomendada: 600×1000px para hero, 400×700px para cards
+- Objeto bem recortado, sem sombra no arquivo (a sombra é aplicada via CSS)
+
+REFERÊNCIA NO HTML:
+  src="phones/cutout/hero-iphone.png"
+  src="phones/cutout/1.png"  → Apple
+  src="phones/cutout/2.png"  → Samsung
+  src="phones/cutout/3.png"  → Xiaomi
+  src="phones/cutout/4.png"  → Motorola

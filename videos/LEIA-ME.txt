@@ -1,0 +1,18 @@
+PASTA: videos/
+
+Adicione aqui o vídeo usado na seção de reparo scroll-scrubbed:
+
+  kling-2.5_Create_an_8-second_premium_exploded-view_repair_animation_of_a_modern_gold_bronz-0.mp4
+
+REQUISITOS:
+- Formato: MP4 (H.264 para compatibilidade máxima)
+- O nome do arquivo deve ser exatamente igual ao acima
+- O vídeo é controlado por scroll (não toca automaticamente)
+- Resolução recomendada: mínimo 720p
+
+REFERÊNCIA NO HTML:
+  src="./videos/kling-2.5_Create_an_8-second_premium_exploded-view_repair_animation_of_a_modern_gold_bronz-0.mp4"
+
+NOTA TÉCNICA:
+O vídeo NÃO funciona via protocolo file:// (clique duplo no HTML).
+Use Live Server no VS Code ou suba para um servidor HTTP.

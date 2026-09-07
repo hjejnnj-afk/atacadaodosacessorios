@@ -1,0 +1,19 @@
+PASTA: depoimentos/
+
+Adicione aqui os prints/capturas dos depoimentos reais de clientes:
+
+  diene-sirqueira.png      → Depoimento da cliente Diene Sirqueira
+  francisco-frazao.png     → Depoimento do cliente Francisco Frazão
+  magno-santos.png         → Depoimento do cliente Magno Santos
+  tiana-moura.png          → Depoimento da cliente Tiana Moura
+
+REQUISITOS:
+- Formato: PNG ou JPG
+- Proporção ideal: quadrada (1:1) ou retangular horizontal
+- Nomeados exatamente como está listado acima (incluindo hifens e minúsculas)
+
+REFERÊNCIA NO HTML:
+  src="depoimentos/diene-sirqueira.png"
+  src="depoimentos/francisco-frazao.png"
+  src="depoimentos/magno-santos.png"
+  src="depoimentos/tiana-moura.png"
